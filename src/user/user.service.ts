@@ -15,7 +15,7 @@ import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>, // Aqui eu puxo os dados do DTO
     private readonly hashingService: HashingService,
   ) {}
 

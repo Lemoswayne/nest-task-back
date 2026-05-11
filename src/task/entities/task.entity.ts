@@ -6,8 +6,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Board } from 'src/board/entities/board.entity';
+import { TaskStatus } from 'src/common/enums/task-status.enum';
 
 @Entity()
 export class Task {
@@ -17,13 +19,10 @@ export class Task {
   @Column()
   title: string;
 
-  @Column()
-  boardId: string;
-
   @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ default: 0 })
   order: number;
 
   @Column({ nullable: true })
@@ -32,8 +31,8 @@ export class Task {
   @Column({ default: false })
   completed: boolean;
 
-  @Column()
-  status: string;
+  @Column({ type: 'varchar', default: TaskStatus.TODO })
+  status: TaskStatus;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -41,7 +40,10 @@ export class Task {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relacionamento com Board
   @ManyToOne(() => Board, (board) => board.tasks, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'boardId' })
   board: Board;
+
+  @Column({ nullable: true })
+  boardId: string;
 }

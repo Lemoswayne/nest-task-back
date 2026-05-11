@@ -3,11 +3,13 @@
 import {
   IsBoolean,
   IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { TaskStatus } from 'src/common/enums/task-status.enum';
 
 export class CreateTaskDto {
   @IsString()
@@ -22,8 +24,8 @@ export class CreateTaskDto {
   @IsOptional()
   description?: string;
 
-  @IsString()
-  status: string;
+  @IsEnum(TaskStatus)
+  status: TaskStatus;
 
   @IsNumber()
   order: number;

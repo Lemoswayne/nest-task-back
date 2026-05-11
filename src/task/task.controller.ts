@@ -10,14 +10,16 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskService } from './task.service';
 import { AuthTokenGuard } from 'src/auth/guards/auth-token.guard';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
 import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ApiBearerAuth } from '@nestjs/swagger/dist/decorators/api-bearer.decorator';
+import { TaskStatus } from 'src/common/enums/task-status.enum';
 
+@ApiTags('tasks')
 @UseGuards(AuthTokenGuard)
 @ApiBearerAuth()
 @Controller('tasks')
@@ -65,7 +67,7 @@ export class TaskController {
   @Patch(':id/status')
   updateStatus(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() body: { status: string },
+    @Body() body: { status: TaskStatus },
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
   ) {
     return this.taskService.updateStatus(id, body.status, tokenPayload);

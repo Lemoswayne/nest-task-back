@@ -11,6 +11,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Board } from 'src/board/entities/board.entity';
 import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
+import { TaskStatus } from 'src/common/enums/task-status.enum';
 
 @Injectable()
 export class TaskService {
@@ -19,7 +20,7 @@ export class TaskService {
     private readonly taskRepository: Repository<Task>,
 
     @InjectRepository(Board)
-    private readonly boardRepository: Repository<Board>, // Importando o repositório de Board
+    private readonly boardRepository: Repository<Board>,
   ) {}
 
   async create(createTaskDto: CreateTaskDto, tokenPayload: TokenPayloadDto) {
@@ -77,10 +78,14 @@ export class TaskService {
     return this.taskRepository.save(updated);
   }
 
-  async updateStatus(id: string, status: string, tokenPayload: TokenPayloadDto): Promise<Task> {
-    const task = await this.taskRepository.findOne({ 
+  async updateStatus(
+    id: string,
+    status: TaskStatus,
+    tokenPayload: TokenPayloadDto,
+  ): Promise<Task> {
+    const task = await this.taskRepository.findOne({
       where: { id },
-      relations: ['board', 'board.user']
+      relations: ['board', 'board.user'],
     });
 
     if (!task) {
@@ -88,13 +93,14 @@ export class TaskService {
     }
 
     if (String(task.board.user.id) !== String(tokenPayload.sub)) {
-      throw new ForbiddenException('Você não tem permissão para atualizar esta tarefa.');
+      throw new ForbiddenException(
+        'Você não tem permissão para atualizar esta tarefa.',
+      );
     }
 
     task.status = status;
-    await this.taskRepository.save(task);
-
-    return task;
+    task.completed = status === TaskStatus.DONE;
+    return this.taskRepository.save(task);
   }
 
   async remove(id: string, tokenPayload: TokenPayloadDto): Promise<void> {

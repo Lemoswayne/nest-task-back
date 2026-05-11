@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Board } from './entities/board.entity';
@@ -14,7 +18,7 @@ export class BoardService {
     private readonly boardRepository: Repository<Board>,
 
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>, // 🔥 Aqui está a solução
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createBoardDto: CreateBoardDto) {
@@ -41,13 +45,18 @@ export class BoardService {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findOne(id: string, tokenPayload: TokenPayloadDto): Promise<Board> {
     const board = await this.boardRepository.findOne({
       where: { id },
-      relations: ['tasks'],
+      relations: ['tasks', 'user'],
     });
+
     if (!board) throw new NotFoundException('Board not found');
+
+    if (board.user.id !== String(tokenPayload.sub)) {
+      throw new ForbiddenException('Você não tem acesso a este board.');
+    }
+
     return board;
   }
 

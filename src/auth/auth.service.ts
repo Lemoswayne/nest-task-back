@@ -6,7 +6,7 @@ import { HashingService } from './hashing/hashing.service';
 import { User } from 'src/user/entities/user.entity';
 import jwtConfig from './config/jwt.config';
 import { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt/dist/jwt.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -45,14 +45,12 @@ export class AuthService {
       },
       {
         audience: this.jwtConfiguration.audience,
-        issuer: this.jwtConfiguration.issuer || 'default-issuer',
+        issuer: this.jwtConfiguration.issuer || 'nest-task',
         secret: this.jwtConfiguration.secret,
         expiresIn: this.jwtConfiguration.jwtTtl,
       },
     );
 
-    return {
-      accessToken,
-    };
+    return { accessToken };
   }
 }
